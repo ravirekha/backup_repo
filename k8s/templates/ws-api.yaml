@@ -48,7 +48,7 @@ spec:
             - name: UFILE_SUFFIX
               value: ".cn-bj.ufileos.com"
             - name: UFILE_ACCESS_KEY
-              value: "${UFILE_ACCESS_KEY}
+              value: "${UFILE_ACCESS_KEY}"
             - name: UFILE_SECRET_KEY
               value: "${UFILE_SECRET_KEY}"
             - name: UFILE_BUCKET
