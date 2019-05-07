@@ -42,7 +42,22 @@ spec:
           command:
           - /bin/bash
           - "-c"
-          - "php artisan migrate --force"
+          - "php artisan migrate"
+          env:
+            - name: APP_ENV
+              value: "${APP_ENV}"
+            - name: LOG_CHANNEL
+              value: "${LOG_CHANNEL}"
+            - name: DB_HOST
+              value: "${DB_HOST}"
+            - name: DB_PORT
+              value: "${DB_PORT}"
+            - name: DB_DATABASE
+              value: "${DB_DATABASE}"
+            - name: DB_USERNAME
+              value: "${DB_USERNAME}"
+            - name: DB_PASSWORD
+              value: "${DB_PASSWORD}"
       containers:
         - name: ws
           image: "${KUBERNETES_IMAGE}"
