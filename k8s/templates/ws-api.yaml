@@ -42,7 +42,7 @@ spec:
           command:
           - /bin/bash
           - "-c"
-          - "php artisan migrate"
+          - "php artisan migrate --force"
       containers:
         - name: ws
           image: "${KUBERNETES_IMAGE}"
