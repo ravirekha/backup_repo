@@ -1,0 +1,123 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ej
+  namespace: gamedragon
+  labels:
+    app.kubernetes.io/name: ej
+spec:
+  type: NodePort
+  ports:
+    - name: ej-http
+      port: 5280
+      targetPort: 5280
+      protocol: TCP
+    - name: ej-c2s
+      port: 5222
+      targetPort: 5222
+      nodePort: 30002
+      protocol: TCP
+    - name: ej-s2s
+      port: 5269
+      targetPort: 5269
+      nodePort: 30003
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: ej
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ej
+  namespace: gamedragon
+  labels:
+    app.kubernetes.io/name: ej
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ej
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ej
+        app.kubernetes.io/version: ejabberd_ws_handler
+        app.kubernetes.io/component: ejabberd
+        app.kubernetes.io/part-of: chat
+    spec:
+      initContainers:
+        - name: prepare-certs
+          image: frapsoft/openssl
+          command:
+          - /bin/sh
+          - "-c"
+          - "cat /key/tls.key > /certs/server.pem && cat /crt/tls.crt >> /certs/server.pem && openssl dhparam -out /certs/dhparams.pem 2048"
+          volumeMounts:
+          - name: crt
+            mountPath: /crt/tls.crt
+            subPath: tls.crt
+            readOnly: true
+          - name: key
+            mountPath: /key/tls.key
+            subPath: tls.key
+            readOnly: true
+          - name: certs
+            mountPath: /certs
+      containers:
+        - name: ej
+          image: "${KUBERNETES_IMAGE}"
+          imagePullPolicy: Always
+          ports:
+            - name: xmpp-c2s
+              containerPort: 5222
+              protocol: TCP
+            - name: xmpp-s2s
+              containerPort: 5269
+              protocol: TCP
+            - name: http
+              containerPort: 5280
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: 5222
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            tcpSocket:
+              port: 5222
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "1"
+              memory: "2G"
+            limits:
+              cpu: "2"
+              memory: "4G"
+          volumeMounts:
+          - name: config-volume
+            mountPath: /app/etc/ejabberd
+          - name: certs
+            mountPath: /certs
+      imagePullSecrets:
+        - name: ucloud
+      volumes:
+        - name: config-volume
+          configMap:
+            name: ej
+        - name: crt
+          secret:
+            secretName: chat-gd1.xmpp.oncam.com
+            items:
+            - key: tls.crt
+              path: tls.crt
+        - name: key
+          secret:
+            secretName: chat-gd1.xmpp.oncam.com
+            items:
+            - key: tls.key
+              path: tls.key
+        - name: certs
+          emptyDir: {}
+---
