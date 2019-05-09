@@ -68,7 +68,7 @@ spec:
             - name: JWT_KEY
               value: "${JWT_KEY}"
             - name: JABBER_URL
-              value: "ej:5280/ws_handler"
+              value: "https://chat-gd1.xmpp.oncam.com/ws_handler"
             - name: UFILE_SUFFIX
               value: ".cn-bj.ufileos.com"
             - name: UFILE_ACCESS_KEY
