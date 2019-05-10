@@ -1,11 +1,10 @@
-# Terraform scenarios
+### Terraform scenarios
 
-dev - gamedragon project
-lt - load testing environment
-lt2 - load testing environment 2 (for federation testing purposes)
-prod - production
-
-templates - configuration templates 
+- dev - gamedragon project
+- lt - load testing environment
+- lt2 - load testing environment 2 (for federation testing purposes)
+- prod - production
+- templates - configuration templates 
 
 Quick Start
 -----------
