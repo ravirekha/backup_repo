@@ -1,0 +1,14 @@
+provider "ucloud" {
+  public_key  = ""
+  private_key = ""
+  project_id  = "org-34em0u"
+  region      = "cn-bj2"
+}
+
+data "ucloud_images" "default" {
+  availability_zone = "${var.az}"
+  os_type           = "linux"
+  image_type        = "base"
+}
+
+data "ucloud_zones" "default" {}
