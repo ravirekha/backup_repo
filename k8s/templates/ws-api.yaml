@@ -48,6 +48,8 @@ spec:
               value: "${APP_ENV}"
             - name: LOG_CHANNEL
               value: "${LOG_CHANNEL}"
+            - name: LOG_LEVEL
+              value: "${LOG_LEVEL}"
             - name: DB_HOST
               value: "${DB_HOST}"
             - name: DB_PORT
