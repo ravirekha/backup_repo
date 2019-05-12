@@ -81,6 +81,8 @@ spec:
               value: "${UFILE_BUCKET}"
             - name: LOG_CHANNEL
               value: "${LOG_CHANNEL}"
+            - name: LOG_LEVEL
+              value: "${LOG_LEVEL}"
             - name: RMQ_HOST
               value: "${RMQ_HOST}"
             - name: RMQ_PORT
