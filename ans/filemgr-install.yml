@@ -1,0 +1,23 @@
+---
+- hosts: Jenkins-Master
+  become: yes
+  tasks:
+  - name: install filemgr-linux64
+    get_url:
+      url: http://tools.ufile.ucloud.com.cn/filemgr-linux64.tar.gz
+      dest: /home/ubuntu/
+      mode: 0755
+      validate_certs: no
+
+  - name: Extract downloaded filemgr file
+    unarchive:
+      src: /home/ubuntu/filemgr-linux64.tar.gz
+      dest: /home/ubuntu/
+      owner: user
+      group: user
+
+  - name: Rename to filemgr-linux64 to filemgr
+    command: chdir=/home/ubuntu/filemgr-linux64 mv filemgr-linux64 filemgr
+
+  - name: Move the binary file
+    command: chdir=/home/ubuntu/filemgr-linux64  mv filemgr /usr/local/bin
