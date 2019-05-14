@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ws
-  namespace: gamedragon
+  namespace: $K8S_NAMESPACE
   labels:
     app.kubernetes.io/name: ws
 spec:
@@ -20,7 +20,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ws
-  namespace: gamedragon
+  namespace: $K8S_NAMESPACE
   labels:
     app.kubernetes.io/name: ws
 spec:
@@ -32,79 +32,79 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: ws
-        app.kubernetes.io/version: develop
+        app.kubernetes.io/version: $K8S_APP_VERSION
         app.kubernetes.io/component: backend
         app.kubernetes.io/part-of: chat
     spec:
       initContainers:
         - name: "migrate-database"
-          image: "${KUBERNETES_IMAGE}"
+          image: "$K8S_IMAGE"
           command:
           - /bin/bash
           - "-c"
           - "php artisan migrate"
           env:
             - name: APP_ENV
-              value: "${APP_ENV}"
+              value: "$K8S_APP_ENV"
             - name: LOG_CHANNEL
-              value: "${LOG_CHANNEL}"
+              value: "$K8S_LOG_CHANNEL"
             - name: LOG_LEVEL
-              value: "${LOG_LEVEL}"
+              value: "$K8S_LOG_LEVEL"
             - name: DB_HOST
-              value: "${DB_HOST}"
+              value: "$K8S_DB_HOST"
             - name: DB_PORT
-              value: "${DB_PORT}"
+              value: "$K8S_DB_PORT"
             - name: DB_DATABASE
-              value: "${DB_DATABASE}"
+              value: "$K8S_DB_DATABASE"
             - name: DB_USERNAME
-              value: "${DB_USERNAME}"
+              value: "$K8S_DB_USERNAME"
             - name: DB_PASSWORD
-              value: "${DB_PASSWORD}"
+              value: "$K8S_DB_PASSWORD"
       containers:
         - name: ws
-          image: "${KUBERNETES_IMAGE}"
+          image: "$K8S_IMAGE"
           imagePullPolicy: Always
           env:
             - name: APP_ENV
-              value: "${APP_ENV}"
+              value: "$K8S_APP_ENV"
             - name: JWT_KEY
-              value: "${JWT_KEY}"
+              value: "$K8S_JWT_KEY"
             - name: JABBER_URL
-              value: "https://chat-gd1.xmpp.oncam.com/ws_handler"
+              value: "K8S_JABBER_URL"
             - name: UFILE_SUFFIX
               value: ".cn-bj.ufileos.com"
             - name: UFILE_ACCESS_KEY
-              value: "${UFILE_ACCESS_KEY}"
+              value: "$K8S_UFILE_ACCESS_KEY"
             - name: UFILE_SECRET_KEY
-              value: "${UFILE_SECRET_KEY}"
+              value: "$K8S_UFILE_SECRET_KEY"
             - name: UFILE_BUCKET
-              value: "${UFILE_BUCKET}"
+              value: "$K8S_UFILE_BUCKET"
             - name: LOG_CHANNEL
-              value: "${LOG_CHANNEL}"
+              value: "$K8S_LOG_CHANNEL"
             - name: LOG_LEVEL
-              value: "${LOG_LEVEL}"
+              value: "$K8S_LOG_LEVEL"
             - name: RMQ_HOST
-              value: "${RMQ_HOST}"
+              value: "$K8S_RMQ_HOST"
             - name: RMQ_PORT
-              value: "${RMQ_PORT}"
+              value: "$K8S_RMQ_PORT"
             - name: RMQ_USER
-              value: "${RMQ_USER}"
+              value: "$K8S_RMQ_USER"
             - name: RMQ_PASS
-              value: "${RMQ_PASS}"
+              value: "$K8S_RMQ_PASS"
             - name: DB_HOST
-              value: "${DB_HOST}"
+              value: "$K8S_DB_HOST"
             - name: DB_PORT
-              value: "${DB_PORT}"
+              value: "$K8S_DB_PORT"
             - name: DB_DATABASE
-              value: "${DB_DATABASE}"
+              value: "$K8S_DB_DATABASE"
             - name: DB_USERNAME
-              value: "${DB_USERNAME}"
+              value: "$K8S_DB_USERNAME"
             - name: DB_PASSWORD
-              value: "${DB_PASSWORD}"
+              value: "$K8S_DB_PASSWORD"
             - name: REDIS_HOST
-              value: "${REDIS_HOST}"
+              value: "$K8S_REDIS_HOST"
             - name: REDIS_PORT
-              value: "${REDIS_PORT}"
+              value: "$K8S_REDIS_PORT"
           ports:
             - name: http
               containerPort: 9000
@@ -120,11 +120,11 @@ spec:
             periodSeconds: 10
           resources:
             limits:
-              cpu: "2"
-              memory: "4Gi"
+              cpu: "$K8S_RES_LIM_CPU"
+              memory: "$K8S_RES_LIM_RAM"
             requests:
-              cpu: "1"
-              memory: "2Gi"
+              cpu: "$K8S_RES_REQ_CPU"
+              memory: "$K8S_RES_REQ_RAM"
         - name: nginx
           image: "nginx:1.16"
           imagePullPolicy: Always
