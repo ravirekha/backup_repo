@@ -1,0 +1,38 @@
+---
+- hosts: Jenkins-Master
+  become: yes
+  tasks:
+
+    - name: ensure the repository is configured
+      apt_repository:
+        repo: 'ppa:certbot/certbot'
+        state: present
+
+
+
+    - name: install python-certbot-nginx
+      apt:
+        name: python-certbot-nginx
+        state: installed
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: latest
+
+    - name: Copy the nginx configuration file
+      copy:
+        src: /etc/ansible/nginx.conf
+        dest: /etc/nginx/sites-available/default
+        remote_src: yes
+
+    - name: Test the configuration file
+      command: "nginx -t"
+
+    - name: Restart the nginx service
+      service:
+        name: nginx
+        state: restarted
+
+    - name: Generate certificate
+      command: "certbot --nginx -d jenkins-ws.oncam.com"
