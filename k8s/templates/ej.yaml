@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ej
-  namespace: ${K8S_NAMESPACE}
+  namespace: $K8S_NAMESPACE
   labels:
     app.kubernetes.io/name: ej
 spec:
@@ -30,11 +30,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ej
-  namespace: ${K8S_NAMESPACE}
+  namespace: $K8S_NAMESPACE
   labels:
     app.kubernetes.io/name: ej
 spec:
-  replicas: ${K8S_DEPLOY_REPLICAS}
+  replicas: $K8S_DEPLOY_REPLICAS
   selector:
     matchLabels:
       app.kubernetes.io/name: ej
@@ -42,10 +42,21 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: ej
-        app.kubernetes.io/version: ${K8S_DEPLOY_VERSION}
+        app.kubernetes.io/version: $K8S_APP_VERSION
         app.kubernetes.io/component: ejabberd
         app.kubernetes.io/part-of: chat
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - ej
+                - ws
+            topologyKey: "kubernetes.io/hostname"
       initContainers:
         - name: prepare-certs
           image: frapsoft/openssl
@@ -64,10 +75,31 @@ spec:
             readOnly: true
           - name: certs
             mountPath: /certs
+        - name: prepare-configs
+          image: busybox
+          env:
+            - name: DOGSTATSD_HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          command:
+          - /bin/sh
+          - -c
+          - cp /config-orig/* /config/ && sed -i 's/statsd_host, "127.0.0.1"/statsd_host,  \"'"$DOGSTATSD_HOST_IP"'\"/g' /config/ejabberd.cfg
+          volumeMounts:
+          - name: certs
+            mountPath: /certs
+          - name: ej-config
+            mountPath: /config
+          - name: config-volume
+            mountPath: /config-orig
       containers:
         - name: ej
-          image: "${K8S_IMAGE}"
+          image: "$K8S_IMAGE"
           imagePullPolicy: Always
+          env:
+            - name: EJABBERD_COOKIE
+              value: "$K8S_EJABBERD_COOKIE"
           ports:
             - name: xmpp-c2s
               containerPort: 5222
@@ -90,13 +122,13 @@ spec:
             periodSeconds: 10
           resources:
             requests:
-              cpu: "${K8S_RES_REQ_CPU}"
-              memory: "${K8S_RES_REQ_RAM}"
+              cpu: "$K8S_RES_REQ_CPU"
+              memory: "$K8S_RES_REQ_RAM"
             limits:
-              cpu: "${K8S_RES_LIM_CPU}"
-              memory: "${K8S_RES_LIM_RAM}"
+              cpu: "$K8S_RES_LIM_CPU"
+              memory: "$K8S_RES_LIM_RAM"
           volumeMounts:
-          - name: config-volume
+          - name: ej-config
             mountPath: /app/etc/ejabberd
           - name: certs
             mountPath: /certs
@@ -108,16 +140,18 @@ spec:
             name: ej
         - name: crt
           secret:
-            secretName: ${K8S_XMPP_DOMAIN_SECRET_NAME}
+            secretName: $K8S_XMPP_DOMAIN_SECRET_NAME
             items:
             - key: tls.crt
               path: tls.crt
         - name: key
           secret:
-            secretName: ${K8S_XMPP_DOMAIN_SECRET_NAME}
+            secretName: $K8S_XMPP_DOMAIN_SECRET_NAME
             items:
             - key: tls.key
               path: tls.key
         - name: certs
+          emptyDir: {}
+        - name: ej-config
           emptyDir: {}
 ---
